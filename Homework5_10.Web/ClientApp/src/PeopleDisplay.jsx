@@ -49,7 +49,7 @@ class PeopleDisplay extends React.Component {
 
     onDeleteMany = () => {
         const ids = this.state.idsToDelete;
-        axios.post('/api/people/deletemany', { ids }).then(response => {
+        axios.post('/api/home/deletemany', { ids }).then(response => {
             this.refreshPeople();
 
         });
