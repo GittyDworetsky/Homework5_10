@@ -1,4 +1,5 @@
 ﻿using Homework5_10.Data;
+using Homework5_10.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,16 +36,24 @@ namespace Homework5_10.Web.Controllers
         public void UpdatePerson(Person person)
         {
             var repo = new ReactPeopleRepository(_connectionString);
-            repo.Edit(person);
+            repo.Update(person);
 
         }
 
         [HttpPost]
         [Route("delete")]
-        public void DeletePeople(List<int> ids)
+        public void DeletePeople(Person p)
         {
             var repo = new ReactPeopleRepository(_connectionString);
-            repo.Delete(ids);
+            repo.Delete(p.Id);
+        }
+
+        [HttpPost]
+        [Route("deletemany")]
+        public void DeleteManyPeople(DeleteManyViewModel vm)
+        {
+            var repo = new ReactPeopleRepository(_connectionString);
+            repo.DeleteMany(vm.Ids);
         }
     }
 }

@@ -32,21 +32,29 @@ namespace Homework5_10.Data
             context.SaveChanges();
         }
 
-        public void Edit(Person person)
+        public void Update(Person person)
         {
             using var context = new ReactPeopleDbContext(_connectionString);
-            context.People.Attach(person);
-            context.Entry(person).State = EntityState.Modified;
+            context.Update(person);
             context.SaveChanges();
+
         }
 
-        public void Delete(List<int> ids)
+        public void Delete(int id)
+        {
+            using var context = new ReactPeopleDbContext(_connectionString); 
+                context.Database.ExecuteSqlInterpolated($"DELETE FROM People WHERE Id = {id}");
+      
+        }
+
+        public void DeleteMany(List<int> ids)
         {
             using var context = new ReactPeopleDbContext(_connectionString);
-            foreach (var id in ids)
+            foreach(int id in ids)
             {
                 context.Database.ExecuteSqlInterpolated($"DELETE FROM People WHERE Id = {id}");
             }
+
         }
 
     }

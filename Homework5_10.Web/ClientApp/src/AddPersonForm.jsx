@@ -18,7 +18,7 @@ export default function AddPersonForm({ firstName, lastName, age, onTextChange, 
                 </button>
             ) : (
                 <div>
-                        <button onClick={onUpdateClick} className="btn btn-warning w-100">Update</button>
+                        <button onClick={() => onUpdateClick()} className="btn btn-warning w-100">Update</button>
                         <button onClick={onCancelClick} className="btn btn-dark w-100 mt-2">Cancel</button>
                 </div>
             )}

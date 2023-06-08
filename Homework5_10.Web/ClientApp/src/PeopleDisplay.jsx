@@ -14,27 +14,60 @@ class PeopleDisplay extends React.Component {
             lastName: '',
             age: ''
         },
-        inEditMode: false
+        inEditMode: false,
+        currentEditId: 0,
+        idsToDelete: []
     }
 
-    generateTable = () => {
+    componentDidMount = () => {
+        this.refreshPeople();
+    }
 
-        const { people } = this.state;
-        console.log(people.length);
+    refreshPeople = () => {
+        axios.get('/api/home/getall').then(response => {
+            const people = response.data;
+            this.setState({ people });
+        });
+     
+    }
 
-        return people.map(p => (
-                <CreatePersonRow
-                    key={p.id}
-                    person={p}
-                    onEditClick={this.onEditClick}
-                    onDeleteClick={this.onDeleteClick}
-                    onCheck={this.onCheck}
-                />
-            ))
-        
-        
+
+    onCheckChange = (id) => {
+
+        const idsToDelete = this.state;
+        let newIdsToDelete;
+        if (!idsToDelete.includes(id)) {
+            newIdsToDelete = [...idsToDelete, id]
+        } else {
+           newIdsToDelete = idsToDelete.filter(i => i !== id);
+
+        }
+
+        this.setState({ idsToDelete: newIdsToDelete });
 
     }
+
+    onDeleteMany = () => {
+        const ids = this.state.idsToDelete;
+        axios.post('/api/people/deletemany', { ids }).then(response => {
+            this.refreshPeople();
+
+        });
+    }
+
+   
+
+    onCheckAll = () => {
+
+        this.setState({ idsToDelete: this.state.people.map(p => p.id) });
+    }
+
+    onUncheckAll = () => {
+
+        this.setState({ idsToDelete: []});
+
+    }
+
 
 
     onTextChange = e => {
@@ -51,7 +84,7 @@ class PeopleDisplay extends React.Component {
 
     onAddClick = () => {
         axios.post('/api/home/add', this.state.person).then(() => {
-            this.getAllPeople();
+            this.refreshPeople();
             this.setState({
                 person: {
                     firstName: '',
@@ -64,29 +97,36 @@ class PeopleDisplay extends React.Component {
 
     onEditClick = (p) => {
         //here i just change how the thing looks with the textboxes filled and different buttons for cancel and update
-        const { firstName, lastName, age } = p;
+        const { firstName, lastName, age, id } = p;
+
         this.setState({
             person: {
                 firstName,
                 lastName,
-                age
+                age,
+                
             },
-            inEditMode: true
+            inEditMode: true,
+            currentEditId: id,
+            allChecked: false
+           
         })
     }
 
     onUpdateClick = () => {
         //once i click this should reset state person to empty and ineditmode to false
-
-        axios.post('/api/home/update', this.state.person).then(() => {
-            this.getAllPeople();
+        const { person, currentEditId } = this.state;
+        axios.post('/api/home/update', { ...person, currentEditId } ).then(() => {
+            this.refreshPeople();
             this.setState({
                 person: {
                     firstName: '',
                     lastName: '',
                     age: ''
                 },
-                inEditMode: false
+                inEditMode: false,
+                currentEditId: 0
+
             });
         });
     }
@@ -103,10 +143,10 @@ class PeopleDisplay extends React.Component {
         });
     }
 
-    onDeleteClick = (listInt) => {
+    onDeleteClick = id => {
 
-        axios.post('/api/home/delete', listInt).then(() => {
-            this.getAllPeople();
+        axios.post('/api/home/delete', {id}).then(() => {
+            this.refreshPeople();
         });
     }
 
@@ -133,7 +173,8 @@ class PeopleDisplay extends React.Component {
                         onAddClick={this.onAddClick}
                         inEditMode={this.state.inEditMode}
                         onUpdateClick={this.onUpdateClick}
-                        onCancelClick={this.onCancelClick }
+                        onCancelClick={this.onCancelClick}
+                        
                     />
                 </div>
                 <div id="root">
@@ -143,9 +184,9 @@ class PeopleDisplay extends React.Component {
                             <thead>
                                 <tr>
                                     <th style={{ width: '15%' }}>
-                                        <button className="btn btn-danger w-100">Delete All</button>
-                                        <button className="btn btn-outline-danger w-100 mt-2">Check All</button>
-                                        <button className="btn btn-outline-danger w-100 mt-2">Uncheck All</button>
+                                        <button className="btn btn-danger w-100" onClick={this.onDeleteMany}>Delete All</button>
+                                        <button className="btn btn-outline-danger w-100 mt-2" onClick={this.onCheckAll}>Check All</button>
+                                        <button className="btn btn-outline-danger w-100 mt-2" onClick={this.onUncheckAll}>Uncheck All</button>
                                     </th>
                                     <th>First Name</th>
                                     <th>Last Name</th>
@@ -154,7 +195,16 @@ class PeopleDisplay extends React.Component {
                                 </tr>
                             </thead>
                             <tbody>
-                                {this.generateTable }
+                                {this.state.people.map(p =>
+                                    <CreatePersonRow
+                                        key={p.id}
+                                        person={p}
+                                        onEditClick={() => this.onEditClick(p)}
+                                        onDeleteClick={() => this.onDeleteClick(p.id)}
+                                        onCheck={this.state.idsToDelete.includes(p.id)}
+                                        onCheckChange={() => this.onCheckChange(p.id)}
+                                    />
+                                )}
                             </tbody>
                         </table>
                     </div>
