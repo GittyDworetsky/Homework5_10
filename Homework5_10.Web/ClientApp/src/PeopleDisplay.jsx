@@ -34,7 +34,7 @@ class PeopleDisplay extends React.Component {
 
     onCheckChange = (id) => {
 
-        const idsToDelete = this.state;
+        const { idsToDelete } = this.state;
         let newIdsToDelete;
         if (!idsToDelete.includes(id)) {
             newIdsToDelete = [...idsToDelete, id]
@@ -104,6 +104,7 @@ class PeopleDisplay extends React.Component {
                 firstName,
                 lastName,
                 age,
+                id
                 
             },
             inEditMode: true,
